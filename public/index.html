@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Cache" content="no-cache">
+    <title>Document</title>
+    <style>
+        #input {
+            caret-color: #ffd476;
+        }
+
+        body {
+            /* filter: grayscale(1); */
+        }
+        p{
+            color: red;
+        }
+        td{
+            width: 100px;
+            border: 1px solid #ccc;
+        }
+        table{
+            border-collapse: collapse;
+        }
+        *{
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <input id="input" type="text">
+    <button id="btn">查询</button>
+    <p class="detail"></p>
+    <div class="add-user">
+        <input class="ID" type="text" placeholder="id">
+        <input class="name" type="text" placeholder="姓名">
+        <input class="sex" type="text" placeholder="性别">
+        <input class="info" type="text" placeholder="信息">
+        <button class="save">添加</button>
+    </div>
+    <p></p>
+    <input class="del-id" type="text">
+    <button class="del-btn">删除</button>
+    <p></p>
+    <table class="table-list">
+    </table>
+    <script>
+        let input = document.querySelector("#input");
+        let detail = document.querySelector(".detail");
+        let ID = document.querySelector(".ID");
+        let name = document.querySelector(".name");
+        let sex = document.querySelector(".sex");
+        let info = document.querySelector(".info");
+        let save = document.querySelector(".save");
+        let del_id = document.querySelector(".del-id");
+        let del_btn = document.querySelector(".del-btn");
+        let list = document.querySelector(".table-list");
+        function getList(){
+            fetch('http://127.0.0.1:3000/api/users/list').then(res => {
+                res.json().then(res =>{
+                    if(res.code == 200){
+                        let str = 
+                            `<tr>
+                                <td>ID</td>
+                                <td>姓名</td>
+                                <td>性别</td>
+                                <td>信息</td>
+                            </tr>`;
+                        res.data.forEach(v =>{
+                            str += 
+                                `<tr>
+                                    <td>${v.id}</td>
+                                    <td>${v.name}</td>
+                                    <td>${v.sex}</td>
+                                    <td>${v.info}</td>
+                                </tr>`
+                        })
+                        list.innerHTML = str;
+                    }
+                })
+            })
+        }
+        getList();
+        btn.onclick = () => {
+            let id = input.value;
+            fetch(`http://127.0.0.1:3000/api/users/detail?id=${id}`).then(res =>{
+                res.json().then(res =>{
+                    if(res.code == 200){
+                        detail.innerHTML = JSON.stringify(res.data[0])
+                    }
+                })
+            })
+        }
+        save.addEventListener('click',()=>{
+            let obj = {
+                id:ID.value,
+                name:name.value,
+                sex:sex.value,
+                info:info.value,
+            }
+            fetch(`http://127.0.0.1:3000/api/users/save`,{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify(obj)
+            }).then(res =>{
+                res.json().then(res =>{
+                    if(res.code == 200){
+                        getList();
+                    }
+                })
+            })
+        })
+        del_btn.addEventListener('click',()=>{
+            let obj = {
+                id:del_id.value
+            }
+            fetch(`http://127.0.0.1:3000/api/users/del`,{
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                },
+                body:JSON.stringify(obj)
+            }).then(res =>{
+                res.json().then(res =>{
+                    if(res.code == 200){
+                        getList();
+                    }
+                })
+            })
+        })
+    </script>
+</body>
+
+</html>
