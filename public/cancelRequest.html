@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <button id="btn1">取消1</button>
+    <button id="btn2">取消2</button>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        let btn1 = document.querySelector("#btn1");
+        let btn2 = document.querySelector("#btn2");
+        btn1.addEventListener('click', () => {
+            sendStr()
+        })
+
+        function sendStr() {
+            if (window.cancel) window.cancel()
+            let CancelToken = axios.CancelToken;
+            axios
+                .get('http://127.0.0.1:3000/test', {
+                    cancelToken: new CancelToken(function executor(c) {
+                        window.cancel = c;
+                    })
+                })
+                .then(res => {
+                    console.log(res);
+                    window.cancel = null
+                })
+        }
+        function sendF(){
+            if(window.downloadController) downloadController.abort()
+            window.downloadController = new AbortController();
+            let signal = window.downloadController.signal;
+            fetch(`http://127.0.0.1:3000/test`, {
+                    signal
+                })
+                .then(res => {
+                    console.log(res);
+                })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+        btn2.addEventListener("click", () => {
+            sendF();
+        })
+    </script>
+</body>
+
+</html>
